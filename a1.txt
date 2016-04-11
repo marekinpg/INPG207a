@@ -17,3 +17,17 @@ define BST_TREE_INSERT_NODE(Tree, InsertNode)
             y->Left = InsertNode
         else
             y->Right = InsertNode
+
+left
+        else
+            x = x->right
+
+    InsertNode->Parent = y
+
+    if (y == NULL) //drzewo jest puste
+        Tree->Root = InsertNode
+    else
+        if (InsertNode->Key < y->key)
+            y->Left = InsertNode
+        else
+            y->Right 
