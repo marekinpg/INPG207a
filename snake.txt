@@ -1,0 +1,1916 @@
+
+
+                               program dzdzownica;
+
+{           *********************************************************
+                       —WIDNICA 2002 - Kamil Skoczylas
+           *********************************************************
+
+}
+
+               uses crt,graph,grafik,matma,rysunki,Drivers,dos,rawy;
+
+
+
+
+Label Poczatek,Koniec,Gra,Autorzy,Ustawienia,Pet;
+
+
+Const
+    opcje:Array[1..5] of string=
+    ('Game Start','Options','From author','Game over','Turbo Pascal 7.0');
+
+    ust:Array[1..5] of string=
+    ('Build level','Music & Sound','1 or 2 Players','Difficulty',
+    'Back to menu');
+
+
+    dzw:Array[1..3,1..5] of word=
+    ((100,201,62,40,0),(200,240,250,220,300)
+    ,(200,540,150,220,200));
+
+    bud:Array[1..4] of byte=
+    (2,3,7,11);
+
+    nazwa:Array[1..4] of string=
+    ('Wall','Ground','Protect','Corridor');
+
+    szyb:word=200;trud:byte=2;
+
+    poztr:Array[1..3] of string=
+    ('(1) Easy','(2) Normal','(3) Hard');
+
+    zkim:Array[1..2] of string=
+    ('(1) 1 Player','(2) 2 Players');
+
+    dwoch:boolean=false;
+
+
+
+
+
+
+
+Var ch:char;
+   czaskuli,dg,dg2,o,dl,ou,rys,key,lev,sz,sz2,
+   wx,wy,bi,wc,zwyc,runda:byte;
+   dx,dy,xm,dx2,dy2:ShortInt;
+   ob:Array[1..17] of pointer;
+   x,y,r,pkt,kul,sp,splev,kul2,pkt2,x2,y2:word;
+   pl:Array[1..25,1..23] of byte;
+   ga,ga2:Array[1..50,1..2] of ShortInt;
+   plik,wtopa,wtopa2,dzwiek,wyjscie,czysc,speaker,
+   soundblaster,raw,r1,r2,wyl:boolean;
+   f:file of byte;
+   s:string;
+   kulki:Array[1..4,1..3] of byte;
+   monit:Array[1..7] of string;
+   pr,dr,m:integer;
+   pliki:Array[1..500] of string[12];
+   naz:SearchRec;
+
+
+
+procedure Zapamietaj;
+Var a:integer;
+begin
+ClearDevice;
+Randomize;
+r:=ImageSize(1,1,20,20);
+for a:=1 to 17 do GetMem(ob[a],r);
+{Tu^¢w}
+SetFillStyle(1,12);
+SetColor(4);
+FillEllipse(10,10,9,9);
+GetImage(1,1,20,20,ob[1]^);
+{Niebieska ~ciana}
+SetFillStyle(1,9);
+Bar(21,1,40,20);
+Przycisk(21,1,40,20,3,1);
+GetImage(21,1,40,20,ob[2]^);
+{Ziemia}
+SetFillStyle(1,6);
+Bar(41,1,60,20);
+Narysuj('.GrafikaDzdz4');
+GetImage(41,1,60,20,ob[3]^);
+{Kula na zjedzonej ziemi}
+SetFillStyle(1,14);
+SetColor(12);
+FillEllipse(70,10,4,4);
+GetImage(61,1,80,20,ob[12]^);
+{Kula na ziemi}
+PutImage(61,1,ob[3]^,0);
+SetFillStyle(1,14);
+SetColor(12);
+FillEllipse(70,10,4,4);
+GetImage(61,1,80,20,ob[4]^);
+{Druga kula na zjedzonej ziemi}
+SetFillStyle(1,15);
+SetColor(12);
+FillEllipse(90,10,6,6);
+GetImage(81,1,100,20,ob[13]^);
+{Druga kula na ziemi}
+PutImage(81,1,ob[3]^,0);
+SetFillStyle(1,15);
+SetColor(12);
+FillEllipse(90,10,6,6);
+GetImage(81,1,100,20,ob[5]^);
+{Trzecia Kula na zjedzonej ziemi}
+SetFillStyle(1,14);
+SetColor(15);
+FillEllipse(110,10,8,8);
+FillEllipse(110,10,4,4);
+GetImage(101,1,120,20,ob[14]^);
+{Trzecia Kula na ziemi}
+PutImage(101,1,ob[3]^,0);
+SetFillStyle(1,14);
+SetColor(15);
+FillEllipse(110,10,8,8);
+FillEllipse(110,10,4,4);
+GetImage(101,1,120,20,ob[6]^);
+{Zielona ~ciana}
+SetFillStyle(1,2);
+Bar(121,1,140,20);
+Przycisk(121,1,140,20,10,8);
+GetImage(121,1,140,20,ob[7]^);
+{G^owa w g¢rŠ}
+PutImage(141,1,ob[1]^,0);
+SetFillStyle(1,0);
+SetColor(12);
+FillEllipse(144,10,3,3);
+FillEllipse(156,10,3,3);
+GetImage(141,1,160,20,ob[8]^);
+{G^owa w bok}
+PutImage(161,1,ob[1]^,0);
+SetFillStyle(1,0);
+SetColor(12);
+FillEllipse(170,4,3,3);
+FillEllipse(170,16,3,3);
+GetImage(161,1,180,20,ob[9]^);
+{Wyj~cie}
+SetFillStyle(5,14);
+Bar(181,1,200,20);
+GetImage(181,1,200,20,ob[10]^);
+{Pusty kwadrat}
+GetImage(201,1,220,20,ob[11]^);
+{Tu^¢w 2}
+SetFillStyle(1,10);
+SetColor(2);
+FillEllipse(10,10,9,9);
+GetImage(1,1,20,20,ob[15]^);
+{G^owa w g¢rŠ}
+PutImage(141,1,ob[15]^,0);
+SetFillStyle(1,0);
+SetColor(10);
+FillEllipse(144,10,3,3);
+FillEllipse(156,10,3,3);
+GetImage(141,1,160,20,ob[16]^);
+{G^owa w bok}
+PutImage(161,1,ob[15]^,0);
+SetFillStyle(1,0);
+SetColor(10);
+FillEllipse(170,4,3,3);
+FillEllipse(170,16,3,3);
+GetImage(161,1,180,20,ob[17]^);
+
+{czekaj;}
+ClearDevice;
+
+end;
+
+procedure ZapamietajLat;
+Var a:integer;
+begin
+ClearDevice;
+Randomize;
+r:=ImageSize(1,1,20,20);
+for a:=1 to 17 do GetMem(ob[a],r);
+{Tu^¢w}
+SetFillStyle(1,12);
+SetColor(4);
+FillEllipse(10,10,9,9);
+GetImage(1,1,20,20,ob[1]^);
+{Chmurka}
+SetFillStyle(1,9);
+Bar(21,25,40,44);
+Narysuj('.Grafikadzdz6');
+przycisk(21,25,40,44,3,8);
+GetImage(21,25,40,44,ob[2]^);
+{Ziemia}
+SetFillStyle(1,6);
+Bar(41,1,60,20);
+Narysuj('.GrafikaDzdz4');
+GetImage(41,1,60,20,ob[3]^);
+{Kula na zjedzonej ziemi}
+SetFillStyle(1,14);
+SetColor(12);
+FillEllipse(70,10,4,4);
+GetImage(61,1,80,20,ob[12]^);
+{Kula na ziemi}
+PutImage(61,1,ob[3]^,0);
+SetFillStyle(1,14);
+SetColor(12);
+FillEllipse(70,10,4,4);
+GetImage(61,1,80,20,ob[4]^);
+{Druga kula na zjedzonej ziemi}
+SetFillStyle(1,15);
+SetColor(12);
+FillEllipse(90,10,6,6);
+GetImage(81,1,100,20,ob[13]^);
+{Druga kula na ziemi}
+PutImage(81,1,ob[3]^,0);
+SetFillStyle(1,15);
+SetColor(12);
+FillEllipse(90,10,6,6);
+GetImage(81,1,100,20,ob[5]^);
+{Trzecia Kula na zjedzonej ziemi}
+SetFillStyle(1,14);
+SetColor(15);
+FillEllipse(110,10,8,8);
+FillEllipse(110,10,4,4);
+GetImage(101,1,120,20,ob[14]^);
+{Trzecia Kula na ziemi}
+PutImage(101,1,ob[3]^,0);
+SetFillStyle(1,14);
+SetColor(15);
+FillEllipse(110,10,8,8);
+FillEllipse(110,10,4,4);
+GetImage(101,1,120,20,ob[6]^);
+{S^oäce}
+SetFillStyle(1,9);
+Bar(121,1,140,20);
+SetFillStyle(1,14);
+SetColor(14);
+FillEllipse(130,10,7,7);
+linia(130,0,130,20,14);
+line(121,10,140,10);
+linia(122,2,138,18,14);
+line(138,2,122,18);
+linia(127,14,128,15,0);
+linia(133,14,132,15,0);
+linia(128,15,132,15,0);
+SetFillStyle(1,0);
+FillEllipse(126,10,1,1);
+FillEllipse(134,10,1,1);
+Przycisk(121,1,140,20,3,8);
+GetImage(121,1,140,20,ob[7]^);
+{G^owa w g¢rŠ}
+PutImage(141,1,ob[1]^,0);
+SetFillStyle(1,0);
+SetColor(12);
+FillEllipse(144,10,3,3);
+FillEllipse(156,10,3,3);
+GetImage(141,1,160,20,ob[8]^);
+{G^owa w bok}
+PutImage(161,1,ob[1]^,0);
+SetFillStyle(1,0);
+SetColor(12);
+FillEllipse(170,4,3,3);
+FillEllipse(170,16,3,3);
+GetImage(161,1,180,20,ob[9]^);
+{Wyj~cie}
+SetFillStyle(5,14);
+Bar(181,1,200,20);
+GetImage(181,1,200,20,ob[10]^);
+{Pusty kwadrat}
+GetImage(201,1,220,20,ob[11]^);
+{Tu^¢w 2}
+SetFillStyle(1,10);
+SetColor(2);
+FillEllipse(10,10,9,9);
+GetImage(1,1,20,20,ob[15]^);
+{G^owa w g¢rŠ}
+PutImage(141,1,ob[15]^,0);
+SetFillStyle(1,0);
+SetColor(10);
+FillEllipse(144,10,3,3);
+FillEllipse(156,10,3,3);
+GetImage(141,1,160,20,ob[16]^);
+{G^owa w bok}
+PutImage(161,1,ob[15]^,0);
+SetFillStyle(1,0);
+SetColor(10);
+FillEllipse(170,4,3,3);
+FillEllipse(170,16,3,3);
+GetImage(161,1,180,20,ob[17]^);
+
+{czekaj;}
+ClearDevice;
+end;
+
+procedure ZapamietajTrud;
+Var a:integer;
+begin
+ClearDevice;
+Randomize;
+r:=ImageSize(1,1,20,20);
+for a:=1 to 17 do GetMem(ob[a],r);
+{Tu^¢w}
+SetFillStyle(1,12);
+SetColor(4);
+FillEllipse(10,10,9,9);
+GetImage(1,1,20,20,ob[1]^);
+{Niebieska ~ciana}
+SetFillStyle(1,7);
+Bar(21,1,40,20);
+Przycisk(21,1,40,20,15,8);
+GetImage(21,1,40,20,ob[2]^);
+{Ziemia}
+SetFillStyle(1,5);
+Bar(41,1,60,20);
+Narysuj('.GrafikaDzdz4');
+GetImage(41,1,60,20,ob[3]^);
+{Kula na zjedzonej ziemi}
+SetFillStyle(1,14);
+SetColor(12);
+FillEllipse(70,10,4,4);
+GetImage(61,1,80,20,ob[12]^);
+{Kula na ziemi}
+PutImage(61,1,ob[3]^,0);
+SetFillStyle(1,14);
+SetColor(12);
+FillEllipse(70,10,4,4);
+GetImage(61,1,80,20,ob[4]^);
+{Druga kula na zjedzonej ziemi}
+SetFillStyle(1,15);
+SetColor(12);
+FillEllipse(90,10,6,6);
+GetImage(81,1,100,20,ob[13]^);
+{Druga kula na ziemi}
+PutImage(81,1,ob[3]^,0);
+SetFillStyle(1,15);
+SetColor(12);
+FillEllipse(90,10,6,6);
+GetImage(81,1,100,20,ob[5]^);
+{Trzecia Kula na zjedzonej ziemi}
+SetFillStyle(1,14);
+SetColor(15);
+FillEllipse(110,10,8,8);
+FillEllipse(110,10,4,4);
+GetImage(101,1,120,20,ob[14]^);
+{Trzecia Kula na ziemi}
+PutImage(101,1,ob[3]^,0);
+SetFillStyle(1,14);
+SetColor(15);
+FillEllipse(110,10,8,8);
+FillEllipse(110,10,4,4);
+GetImage(101,1,120,20,ob[6]^);
+{Zielona ~ciana}
+SetFillStyle(1,2);
+Bar(121,1,140,20);
+SetFillStyle(1,10);
+SetColor(8);
+Circle(131,11,5);
+SetColor(2);
+FillEllipse(130,10,5,5);
+
+Przycisk(121,1,140,20,15,8);
+GetImage(121,1,140,20,ob[7]^);
+{G^owa w g¢rŠ}
+PutImage(141,1,ob[1]^,0);
+SetFillStyle(1,0);
+SetColor(12);
+FillEllipse(144,10,3,3);
+FillEllipse(156,10,3,3);
+GetImage(141,1,160,20,ob[8]^);
+{G^owa w bok}
+PutImage(161,1,ob[1]^,0);
+SetFillStyle(1,0);
+SetColor(12);
+FillEllipse(170,4,3,3);
+FillEllipse(170,16,3,3);
+GetImage(161,1,180,20,ob[9]^);
+{Wyj~cie}
+SetFillStyle(5,14);
+Bar(181,1,200,20);
+GetImage(181,1,200,20,ob[10]^);
+{Pusty kwadrat}
+GetImage(201,1,220,20,ob[11]^);
+{Tu^¢w 2}
+SetFillStyle(1,10);
+SetColor(2);
+FillEllipse(10,10,9,9);
+GetImage(1,1,20,20,ob[15]^);
+{G^owa w g¢rŠ}
+PutImage(141,1,ob[15]^,0);
+SetFillStyle(1,0);
+SetColor(10);
+FillEllipse(144,10,3,3);
+FillEllipse(156,10,3,3);
+GetImage(141,1,160,20,ob[16]^);
+{G^owa w bok}
+PutImage(161,1,ob[15]^,0);
+SetFillStyle(1,0);
+SetColor(10);
+FillEllipse(170,4,3,3);
+FillEllipse(170,16,3,3);
+GetImage(161,1,180,20,ob[17]^);
+
+{czekaj;}
+ClearDevice;
+end;
+
+
+
+
+procedure GrajDzwiek(a:byte);
+Var b:byte;
+begin
+if dl>0 then begin
+if dl<5 then
+begin
+if dzw[a,dl]>60 then
+if speaker then Sound(dzw[a,dl]) else if speaker then NoSound;
+dl:=dl+1;
+end else
+begin
+dl:=0;
+if speaker then NoSound;
+end;
+end;
+end;
+
+procedure odczytaj_opcje;
+Var b:byte;
+begin
+Assign(F,'.Daneconfig.muz');
+Reset(F);
+Read(F,b);
+Close(F);
+if b>=4 then begin raw:=true;b:=b-4;end;
+if b>=2 then begin soundblaster:=true;b:=b-2;end;
+if b>=1 then begin speaker:=true;b:=b-1;end;
+
+end;
+
+
+procedure blackamper;
+begin
+narysuj('.Grafikatecza');
+SetTextStyle(2,0,7);
+SetColor(15);
+CenterText(320,350,'English version');
+CenterText(321,350,'English version');
+b:=0;
+gw_init;
+repeat
+b:=b+1;
+delay(10);
+gwi;
+until (keypressed or (b>500));
+zapomnij;
+ClearDevice;
+narysuj('.Grafikablacka');
+gw_init;
+b:=0;
+repeat
+b:=b+1;
+delay(10);
+gwi;
+until (keypressed or (b>300));
+if speaker then NoSound;
+ClearDevice;
+zapomnij;
+end;
+
+procedure pascal;
+begin
+ClearDevice;
+if soundblaster then Graj_Muzyke('.MusicMUSIC3.HSC');
+okno(160,20,480,50);
+okno(60,80,580,380);
+SetTextStyle(0,0,1);
+SetColor(15);
+st(30,'TURBO PASCAL 7.0');
+st(90,'Down is descripton - How make a few effect :');
+SetColor(14);
+st(110,'- How make animate picture, which not twinkle ?');
+SetColor(15);
+st(130,'The best is use procedure GETIMAGE and PUTIMAGE. First procedure');
+st(150,'memorize any picture from screen and second show this.');
+SetColor(14);
+st(170,'- How make stars ?');
+SetColor(15);
+st(190,'You must make table variable (the best is WORD or INTEGER),');
+st(210,'which is save position X and Y, and speed star and you must');
+st(230,'subtract X of 1, next if on star is nothing then you draw pixel');
+st(250,'in position x & y');
+SetColor(14);
+st(270,'How make good picture (in pascal) ?');
+SetColor(15);
+st(290,'If you want make good picture you can make a program, which');
+st(310,'can help you. I have one (this is my own). My PAINT is good');
+st(330,'to draw small picture (small size). I make format PKS.');
+st(350,'Pks is cool if you draw little.');
+
+gw_init;
+zapomnij;
+repeat
+gwi;
+Delay(10);
+until keypressed;
+if soundblaster then Wylacz_muzyke;
+ClearDevice;
+end;
+
+
+
+procedure pocz;
+Var a,b:integer;
+
+begin
+for a:=1 to 32 do
+   for b:=1 to 24 do PutImage((a-1)*20,(b-1)*20,ob[2+Random(2)]^,0);
+okno(40,50,599,230);
+SetTextStyle(4,0,14);
+SetColor(2);
+Centertext(318,30,'Rainworm');
+SetColor(10);
+Centertext(319,31,'Rainworm');
+SetColor(14);
+Centertext(320,32,'Rainworm');
+
+SetTextStyle(0,0,1);
+SetColor(15);
+RightText(500,170,'Kamil Skoczylas');
+okno(200,290,440,320);
+SetFillStyle(1,15);
+Bar(250,295,390,315);
+Przycisk(250,295,390,315,0,7);
+Przycisk(249,294,391,316,8,15);
+
+end;
+
+procedure rysujopcje;
+
+begin
+
+      SetFillStyle(1,15);
+      Bar(251,296,389,314);
+      SetColor(0);
+      st(300,opcje[o]);
+
+end;
+
+
+procedure wybor;
+
+begin
+o:=1;
+rysujopcje;
+repeat
+if keypressed then
+  begin
+  ch:=ReadKey;
+  case ch of
+       #72:begin
+       o:=o-1;
+       if o<1 then o:=5;
+       if raw then begin GrajRaw('.Sound000.Raw',6);Delay(500);Wylacz;end;
+       end;
+       #80:begin
+       o:=o+1;
+       if o>5 then o:=1;
+       if raw then begin GrajRaw('.Sound000.Raw',6);Delay(500);Wylacz;end;
+       end;
+  end;
+  rysujopcje;
+  if ((ch=#80) or (ch=#72)) then
+     begin
+     dl:=1;
+     zapomnij;
+     end else if ch<>#0 then zapomnij;
+  end;
+if dl>0 then GrajDzwiek(1);
+
+delay(20);
+until ((ch=#13) or (ch=#27));
+if speaker then NoSound;
+if raw then begin GrajRaw('.Sound002.Raw',1);Delay(1000);Wylacz;end;
+end;
+
+procedure aut;
+Var a,b:integer;
+
+begin
+ClearDevice;
+if soundblaster then Graj_Muzyke('.MusicMUSIC4.HSC');
+for a:=1 to 32 do
+   for b:=1 to 24 do PutImage((a-1)*20,(b-1)*20,ob[2+Random(2)]^,0);
+SetFillStyle(1,2);
+Bar(140,30,500,475);
+przycisk(140,30,500,475,10,8);
+SetTextStyle(2,0,8);
+st(40,'FROM AUTHOR :');
+SetColor(14);
+SetTextStyle(2,0,5);
+st(70,'This program was write in language :');
+st(90,'Turbo Pascal 7.0. Program was make in Swi-');
+st(110,'dnica by Kamil Skoczylas. I do not know');
+st(130,'why - maybe because I am feel bored and I');
+st(150,'long ago not make programs in pascal.');
+st(170,'Any consideration you can send brought');
+st(190,'internet on adress :');
+SetColor(15);
+st(220,'BlackAmper@poczta.onet.pl');
+SetColor(14);
+st(250,'This game is for me - the best game of');
+st(270,'any rainworm. In my game are sometimes');
+st(290,'balls, which add a life, slowly down a game,');
+st(310,'fastes up a game, reveal map, show where is');
+st(330,'exit and add a balls, which are needed');
+st(350,'to go to next level.');
+st(430,'Sorry for any errors in English language');
+zapomnij;
+czekaj;
+if soundblaster then Wylacz_Muzyke;
+if raw then begin GrajRaw('.Sound001.Raw',1);Delay(500);Wylacz;end;
+end;
+
+procedure uop;
+begin
+SetFillStyle(1,9);
+Bar(210,60,230,350);
+Bar(410,60,430,350);
+
+PutImage(210,25+ou*50,ob[7]^,0);
+PutImage(410,25+ou*50,ob[7]^,0);
+
+end;
+
+
+procedure odswiez;
+begin
+PutImage(530,220,ob[bud[ry'>]^,0);
+SetFillStyle(1,7);
+Bar(560,225,630,235);
+SetColor(0);
+tekst(560,225,nazwa[ry'>);
+przycisk(10+(x-1)*20,10+(y-1)*20,30+(x-1)*20,30+(y-1)*20,15,12);
+end;
+
+procedure wykasuj;
+begin
+SetColor(0);
+RecTangle(10+(x-1)*20,10+(y-1)*20,30+(x-1)*20,30+(y-1)*20);
+end;
+
+procedure kursor;
+begin
+przycisk(10+(x-1)*20,10+(y-1)*20,30+(x-1)*20,30+(y-1)*20,15,12);
+end;
+
+
+procedure ustaw;
+Var a,b,d:integer;
+begin
+if soundblaster then Graj_Muzyke('.MusicMUSIC3.HSC');
+repeat
+for a:=1 to 32 do
+   for b:=1 to 24 do if Random(10)>5 then
+       PutImage((a-1)*20,(b-1)*20,ob[2]^,0) else
+       PutImage((a-1)*20,(b-1)*20,ob[7]^,0);
+
+okno(200,40,440,360);
+for a:=1 to 5 do
+   begin
+   okno(250,20+a*50,390,50+a*50);
+   przycisk(260,25+a*50,382,45+a*50,0,15);
+   przycisk(261,26+a*50,381,44+a*50,8,7);
+   SetFillStyle(1,15);
+   Bar(262,27+a*50,380,43+a*50);
+   SetColor(0);
+   st(32+a*50,ust[a]);
+   end;
+
+zapomnij;
+ou:=1;
+uop;
+dl:=0;
+ch:=#0;
+repeat
+
+if keypressed then
+begin
+ch:=ReadKey;
+
+case ch of
+    #72:begin
+    ou:=ou-1;
+    if ou<1 then ou:=5;
+    uop;
+    dl:=1;
+    zapomnij;
+    if raw then begin GrajRaw('.Sound000.Raw',1);Delay(300);Wylacz;end;
+    end;
+    #80:begin
+    ou:=ou+1;
+    if ou>5 then ou:=1;
+    uop;
+    dl:=1;
+    zapomnij;
+    if raw then begin GrajRaw('.Sound000.Raw',1);Delay(300);Wylacz;end;
+    end;
+    end;
+    if ((ch<>#0) and (ch<>#72) and (ch<>#80)) then zapomnij;
+end;
+if dl>0 then GrajDzwiek(2);
+Delay(30);
+until ((ch=#27) or (ch=#13));
+if raw then begin GrajRaw('.Sound002.Raw',1);Delay(1000);Wylacz;end;
+if speaker then NoSound;
+if ch=#27 then ou:=5;
+ch:=#0;
+zapomnij;
+if not ((ou=5) or (ch=#27)) then
+  begin
+  if ou=1 then
+     begin
+     for a:=1 to 25 do
+   for b:=1 to 23 do
+       begin
+       pl[a,b]:=3;
+       end;
+
+
+     ClearDevice;
+     Drzwi(3,3,637,477);
+     Przycisk(9,9,511,471,8,15);
+     for a:=1 to 25 do
+   for b:=1 to 23 do
+       begin
+       PutImage(10+(a-1)*20,10+(b-1)*20,ob[pl[a,b]]^,0);
+       end;
+     for a:=1 to 25 do
+       linia(10+(a-1)*20,10,10+(a-1)*20,469,0);
+     for b:=1 to 23 do
+       linia(10,10+(b-1)*20,509,10+(b-1)*20,0);
+     SetTextStyle(0,0,2);
+     SetColor(2);
+     tekst(520,20,'What is :');
+     SetColor(10);
+     tekst(522,22,'What is :');
+     SetTextStyle(0,0,1);
+     SetColor(0);
+     for a:=1 to 4 do
+     begin
+     PutImage(530,50+a*30,ob[bud[a]]^,0);
+     tekst(555,55+a*30,'- '+sr(a));
+     end;
+     tekst(520,200,'REALLY');
+     tekst(520,300,'Drawing :');
+     tekst(520,320,'L. Shift');
+     x:=1;
+     y:=1;
+     rys:=1;
+     odswiez;
+     zapomnij;
+     ch:=#0;
+
+
+     repeat
+     if (GetShiftState and 2)=2 then
+        begin
+        if pl[x,y]<>bud[ry'> then
+        begin
+
+        PutImage(10+(x-1)*20,10+(y-1)*20,ob[bud[ry'>]^,0);
+        pl[x,y]:=bud[ry'>;
+        kursor;
+        if raw then begin GrajRaw('.Sound001.Raw',1);Delay(20);Zapomnij;Wylacz;end;
+
+        end;
+        end;
+
+     if keypressed then
+        begin
+        ch:=ReadKey;
+        case ch of
+        #49:begin
+        rys:=1;
+        odswiez;
+        end;
+        #50:begin
+        rys:=2;
+        odswiez;
+        end;
+        #51:begin
+        rys:=3;
+        odswiez;
+        end;
+        #52:begin
+        rys:=4;
+        odswiez;
+        end;
+        #72:begin
+        wykasuj;
+        y:=y-1;
+        if y<1 then y:=23;
+        kursor;
+        end;
+        #80:begin
+        wykasuj;
+        y:=y+1;
+        if y>23 then y:=1;
+        kursor;
+        end;
+        #75:begin
+        wykasuj;
+        x:=x-1;
+        if x<1 then x:=25;
+        kursor;
+        end;
+        #77:begin
+        wykasuj;
+        x:=x+1;
+        if x>25 then x:=1;
+        kursor;
+        end;
+        end;
+        end;
+
+     until ((ch=#13) or (ch=#27));
+
+
+
+     Okno(150,100,490,190);
+     SetColor(15);
+     Centertext(320,110,'How do you want to called this level ?');
+     CenterText(320,130,'(For calcel, hit escape)');
+     przycisk(240,150,400,170,0,15);
+     przycisk(241,151,399,169,8,7);
+     SetFillStyle(1,15);
+     Bar(242,152,398,168);
+     zapomnij;
+     ch:=#0;
+     a:=0;
+     s:='';
+     repeat
+     if keypressed then
+        begin
+        ch:=ReadKey;
+
+        if ((((ord(ch)>=65) and (ord(ch)<=90)) or ((ord(ch)>=97) and (ord(ch)<=122))) and (a<8))
+        then begin if speaker then sound(100);Delay(10);if speaker then NoSound;s:=s+ch;a:=length(s);Zapomnij;
+        if raw then begin GrajRaw('.Sound003.Raw',1);Delay(40);zapomnij;Wylacz;end;
+        end;
+        if ch=#8 then begin delete(s,length(s),1);a:=length(s);
+        if speaker then sound(300);Delay(10);if speaker then NoSound;
+        if raw then begin GrajRaw('.Sound003.Raw',1);Delay(20);zapomnij;Wylacz;
+        end;
+        end;
+        SetFillStyle(1,15);
+        Bar(242,152,398,168);
+        SetColor(0);
+        st(155,s);
+        end;
+     until ((ch=#13) or (ch=#27));
+     if ch=#13 then
+     begin
+     Assign(F,'.Level'+sr(trud)+''+s+'.lev');
+     Rewrite(F);
+     for a:=1 to 25 do
+         for b:=1 to 23 do Write(F,pl[a,b]);
+
+     Close(f);
+     end;
+     end;
+  if ou=2 then
+     begin
+     okno(50,100,590,300);
+     SetTextStyle(0,0,1);
+     SetColor(14);
+     St(110,'OPTIONS MUSIC AND SOUND');
+     SetColor(15);
+     SetTextStyle(2,0,4);
+     tekst(80,215,'(1) No Sound');
+     tekst(183,215,'(2) PC Speaker');
+     tekst(280,215,'(3) MIDI');
+     tekst(380,215,'(4) Spk. + MIDI');
+     tekst(480,215,'(5) Sound');
+     Przycisk(75,122,175,230,10,8);
+     Przycisk(180,122,265,230,10,8);
+     Przycisk(270,122,365,230,10,8);
+     Przycisk(370,122,465,230,10,8);
+     Przycisk(470,122,580,230,10,8);
+     SetTextStyle(0,0,1);
+     SetColor(15);
+     st(250,'Press key for 1 to 5 to change option of sound');
+     narysuj('.Grafikadzdz5');
+     zapomnij;
+     repeat
+     ch:=ReadKey;
+     until ((ch=#27) or (ch='1') or (ch='2') or (ch='3') or (ch='4') or (ch='5'));
+     if ch<>#27 then
+        begin
+        if ch='1' then bi:=0;
+        if ch='2' then bi:=1;
+        if ch='3' then bi:=2;
+        if ch='4' then bi:=3;
+        if ch='5' then bi:=4;
+        Assign(F,'.daneconfig.muz');
+        Rewrite(f);
+        Write(f,bi);
+        Close(f);
+        if ((bi<>2) and (bi<>3) and SoundBlaster) then Wylacz_muzyke;
+        raw:=false;
+        speaker:=false;
+        SoundBlaster:=false;
+
+        if bi=1 then
+        begin
+        Speaker:=true;
+
+        end;
+        if bi=3 then
+        begin
+        SoundBlaster:=true;
+        Speaker:=True;
+        Graj_Muzyke('.MusicMUSIC3.HSC');
+        end;
+        if bi=2 then
+        begin
+        SoundBlaster:=true;
+        Graj_Muzyke('.MusicMUSIC3.HSC');
+        end;
+        if bi=4 then
+        begin
+        Raw:=true;
+        end;
+
+        end;
+
+
+     end;
+  if ou=3 then
+     begin
+     okno(150,100,490,300);
+     SetTextStyle(0,0,1);
+     SetColor(15);
+     st(110,'How many players ?');
+     for a:=0 to 1 do
+         tekst(210+a*130,250,zkim[a+1]);
+     narysuj('.Grafikadzdz8');
+     ch:=#0;
+     repeat
+     ch:=ReadKey;
+     until ((ch='1') or (ch='2') or (ch=#27));
+     if ch='1' then dwoch:=false;
+     if ch='2' then dwoch:=true;
+
+     end;
+  if ou=4 then
+     begin
+     SetTextStyle(0,0,1);
+     okno(150,100,490,250);
+     SetColor(15);
+     st(110,'GAME SPEED');
+     st(140,'To change speed game press left or right');
+     tekst(200,180,'Slow');
+     tekst(400,180,'Fast');
+
+     st(190,'LEVEL DIFFICULTY');
+     for a:=1 to 3 do
+     begin
+     if trud=a then SetColor(14) else SetColor(15);
+     tekst(170+(a-1)*100,220,poztr[a]);
+     end;
+     przycisk(220,160,420,175,8,15);
+     d:=szyb;
+     SetFillStyle(1,9);
+     Bar(221,161,419,174);
+     SetFillStyle(1,12);
+     Bar(221,161,221+(195-(d div 4)),174);
+     repeat
+     ch:=ReadKey;
+     if ch=#0 then
+     begin
+     ch:=ReadKey;
+     if ch=#77 then
+        begin
+        if d>5 then d:=d-5;
+        SetFillStyle(1,9);
+     Bar(221+(195-(d div 4)),161,419,174);
+     SetFillStyle(1,12);
+     Bar(221,161,221+(195-(d div 4)),174);
+        if speaker then begin sound(d+100);Delay(5);NoSound;end;
+        end;
+     if ch=#75 then
+        begin
+        if d<775 then d:=d+5;
+        SetFillStyle(1,9);
+     Bar(221+(195-(d div 4)),161,419,174);
+     SetFillStyle(1,12);
+     Bar(221,161,221+(195-(d div 4)),174);
+        if speaker then begin sound(d+100);Delay(5);NoSound;end;
+        end;
+        end else
+        begin
+        if ((ord(ch)>48) and (ord(ch)<52)) then
+           begin
+           if trud<>va(ch) then
+           begin
+           trud:=va(ch);
+           if speaker then begin Sound(100);delay(50);NoSound; end;
+           for a:=1 to 3 do
+            begin
+            if trud=a then SetColor(14) else SetColor(15);
+            tekst(170+(a-1)*100,220,poztr[a]);
+            end;
+            end;
+           end;
+        end;
+
+        zapomnij;
+     until ((ch=#27) or (ch=#13));
+     szyb:=d;
+     for a:=1 to 15 do FreeMem(ob[a],r);
+     if trud=1 then ZapamietajLat;
+     if trud=2 then Zapamietaj;
+     if trud=3 then Zapamietajtrud;
+     end;
+  end;
+until ou=5;
+if soundblaster then Wylacz_Muzyke;
+end;
+procedure losuj;
+Var a,b,c,d,ile:byte;
+   czy:boolean;
+begin
+Randomize;
+if speaker then Sound(400);
+if not dwoch then begin
+czy:=true;
+if kul<=12 then ile:=3;
+if kul=13 then ile:=2;
+if kul=14 then ile:=1;
+if ile<3 then for a:=1 to 3 do kulki[a,3]:=0;
+end else ile:=3;
+
+if (dwoch or (not dwoch and (kul<15))) then
+begin
+for d:=1 to ile do
+begin
+While (((pl[a,b]<>3) and (pl[a,b]<>11)) or czy) do
+begin
+a:=Random(25)+1;
+b:=Random(23)+1;
+czy:=false;
+for c:=1 to dg do if ((ga[c,1]=a) or (ga[c,2]=b)) then czy:=true;
+if dwoch then for c:=1 to dg do if ((ga2[c,1]=a) or (ga2[c,2]=b)) then czy:=true;
+end;
+if pl[a,b]=3 then
+  begin
+  kulki[d,3]:=1;
+  pl[a,b]:=4;
+  PutImage(10+(a-1)*20,10+(b-1)*20,ob[4]^,0);
+  end else
+  begin
+  kulki[d,3]:=3;
+  pl[a,b]:=12;
+  PutImage(10+(a-1)*20,10+(b-1)*20,ob[12]^,0);
+  end;
+kulki[d,1]:=a;
+kulki[d,2]:=b;
+end;
+end;
+{Dodatek}
+if Random(4)=2 then
+begin
+if kulki[4,3]>0 then
+  begin
+  if kulki[4,3]<3 then
+  begin
+  pl[kulki[4,1],kulki[4,2]]:=3;
+  PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[3]^,0) end else
+     begin
+     pl[kulki[4,1],kulki[4,2]]:=11;
+     PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[11]^,0);
+     end;
+  end;
+
+czy:=true;
+While (((pl[a,b]<>3) and (pl[a,b]<>11)) or czy) do
+begin
+czaskuli:=40;
+a:=Random(25)+1;
+b:=Random(23)+1;
+czy:=false;
+
+for c:=1 to dg do if ((ga[c,1]=a) or (ga[c,2]=b)) then czy:=true;
+if dwoch then for c:=1 to dg do if ((ga2[c,1]=a) or (ga2[c,2]=b)) then czy:=true;
+end;
+if pl[a,b]=3 then
+  begin
+  kulki[4,3]:=1;
+  pl[a,b]:=6;
+  PutImage(10+(a-1)*20,10+(b-1)*20,ob[6]^,0);
+  end else
+  begin
+  kulki[4,3]:=3;
+  pl[a,b]:=14;
+  PutImage(10+(a-1)*20,10+(b-1)*20,ob[14]^,0);
+  end;
+  kulki[4,1]:=a;
+  kulki[4,2]:=b;
+  end;
+if speaker then NoSound;
+end;
+
+procedure punkty;
+begin
+SetFillStyle(1,0);
+Bar(522,432,629,459);
+SetColor(15);
+SetTextStyle(0,0,2);
+tekst(530,440,sr(pkt));
+SetTextStyle(0,0,1);
+end;
+
+procedure szans;
+begin
+SetTextStyle(0,0,2);
+SetColor(2);
+tekst(520,70,'Lifes:');
+SetColor(10);
+tekst(522,72,'Lifes:');
+Przycisk(520,95,630,125,8,15);
+SetFillStyle(1,0);
+Bar(522,97,629,124);
+SetColor(15);
+tekst(530,100,'x '+sr(sz));
+end;
+
+procedure kule;
+begin
+SetFillStyle(1,0);
+Bar(522,232,629,259);
+SetColor(15);
+SetTextStyle(0,0,2);
+tekst(530,235,'x '+sr(kul));
+end;
+
+function ktora:byte;
+Var a:integer;
+begin
+for a:=1 to 3 do
+   if ((kulki[a,1]=x) and (kulki[a,2]=y)) then ktora:=a;
+end;
+
+function ktora2:byte;
+Var a:integer;
+begin
+for a:=1 to 3 do
+   if ((kulki[a,1]=x2) and (kulki[a,2]=y2)) then ktora2:=a;
+end;
+
+procedure monitor(s:string);
+Var a:integer;
+begin
+if speaker then Sound(100);
+SetTextStyle(2,0,4);
+xm:=xm+1;
+SetFillStyle(1,0);
+Bar(522,312,629,389);
+if xm>7 then
+begin
+for a:=2 to xm do monit[a-1]:=monit[a];
+xm:=7;
+end;
+monit[xm]:=s;
+for a:=1 to 7 do
+tekst(525,305+10*a,monit[a]);
+if speaker then NoSound;
+end;
+procedure punkty2;
+begin
+SetFillStyle(1,0);
+SetTextStyle(0,0,2);
+Bar(522,170,629,200);
+przycisk(520,168,630,201,8,15);
+SetColor(15);
+tekst(530,177,sr(pkt2));
+end;
+
+
+procedure graj;
+Var a,b,c,d,klk:integer;
+   level:boolean;
+begin
+if not dwoch then begin
+sz:=6-trud;
+lev:=1;
+pkt:=0;
+ch:=#0;
+wtopa:=false;
+sp:=szyb;
+
+repeat
+ClearDevice;
+SetColor(15);
+SetTextStyle(2,0,5);
+st(200,'Level '+sr(lev));
+if lev=13 then st(150,'LAST LEVEL !');
+a:=200;
+zapomnij;
+level:=false;
+if not wtopa then kul:=0;
+if raw then GrajRaw('.Sound003.Raw',1);
+
+repeat
+a:=a+1;
+Delay(10);
+SetFillStyle(1,0);
+d:=sz;
+if d>7 then d:=7;
+for c:=1 to d do
+begin
+Bar(a-60-c*10,220+c*30,a-61-c*10,240+c*30);
+for b:=4 downto 2 do
+   begin
+   PutImage(a-(b-1)*20-c*10,220+c*30,ob[1]^,0);
+   end;
+PutImage(a-c*10,220+c*30,ob[9]^,0);
+end;
+until (keypressed or (a>440));
+if raw then Wylacz;
+zapomnij;
+ClearDevice;
+
+ch:=#0;
+Drzwi(3,3,637,477);
+Przycisk(9,9,511,470,8,15);
+Przycisk(520,430,630,460,8,15);
+SetFillStyle(1,0);
+Bar(522,432,629,459);
+SetTextStyle(0,0,2);
+SetColor(2);
+Tekst(522,410,'Points:');
+SetColor(10);
+Tekst(524,412,'Points:');
+Przycisk(520,230,630,260,8,15);
+SetFillStyle(1,0);
+Bar(522,232,629,259);
+SetTextStyle(0,0,2);
+SetColor(2);
+Tekst(522,210,'Balls:');
+SetColor(10);
+Tekst(524,212,'Balls:');
+
+Przycisk(520,310,630,390,8,15);
+SetFillStyle(1,0);
+Bar(522,312,629,389);
+SetColor(2);
+Tekst(522,280,'Monitor');
+Tekst(522,143,'Level:');
+SetColor(10);
+Tekst(524,282,'Monitor');
+Tekst(524,145,'Level:');
+SetFillStyle(1,0);
+Bar(522,170,629,200);
+przycisk(520,168,630,201,8,15);
+SetColor(15);
+tekst(530,177,sr(lev));
+
+if not wtopa then
+begin
+Assign(F,'.level'+sr(trud)+'lev'+sr(lev)+'.lev');
+Reset(f);
+for a:=1 to 25 do
+         for b:=1 to 23 do Read(F,pl[a,b]);
+
+Close(F);
+
+a:=Random(25)+1;
+b:=Random(23)+1;
+While ((pl[a,b]<>3) and (pl[a,b]<>11)) do
+begin
+a:=Random(25)+1;
+b:=Random(23)+1;
+end;
+wc:=pl[a,b];
+pl[a,b]:=10;
+wx:=a;
+wy:=b;
+
+end;
+
+for a:=1 to 25 do
+   for b:=1 to 23 do
+       if (((pl[a,b]=4) or (pl[a,b]=6)) and wtopa) then
+       pl[a,b]:=3 else if (((pl[a,b]=12) or (pl[a,b]=14)) and wtopa) then
+       pl[a,b]:=11;
+
+
+if not wtopa then wyjscie:=false;
+for a:=1 to 25 do
+   for b:=1 to 23 do
+       if (pl[a,b]<>10) then
+       PutImage(10+(a-1)*20,10+(b-1)*20,ob[pl[a,b]]^,0) else
+       if not wyjscie then
+       begin if wc=3 then PutImage(10+(a-1)*20,10+(b-1)*20,ob[3]^,0) else
+       PutImage(10+(a-1)*20,10+(b-1)*20,ob[10]^,0)
+       end else
+       PutImage(10+(a-1)*20,10+(b-1)*20,ob[10]^,0);
+
+ch:=#0;
+dx:=0;
+dy:=1;
+x:=1;
+y:=1;
+ga[1,1]:=1;
+ga[1,2]:=1;
+ga[2,1]:=1;
+ga[2,2]:=0;
+ga[3,2]:=-1;
+ga[3,1]:=1;
+ga[4,2]:=-2;
+ga[4,1]:=1;
+
+SetFillStyle(1,9);
+SetColor(9);
+FillEllipse(575,40,50,15);
+narysuj('.Grafikadzdz3');
+SetTextStyle(0,0,1);
+SetColor(0);
+centertext(575,35,'Black Amper');
+if not wtopa then
+begin
+czaskuli:=0;
+kulki[4,3]:=0;
+end;
+
+if not wtopa then czysc:=false;
+dg:=4;
+splev:=0;
+wtopa:=false;
+a:=Random(25);
+b:=Random(23);
+if kul<15 then begin losuj;klk:=3;end;
+
+punkty;
+szans;
+kule;
+xm:=0;
+for a:=1 to 7 do monit[a]:='';
+if kul<15 then
+begin
+Monitor('Find '+sr(15-kul));
+Monitor('balls and');
+end;
+if not wyjscie then Monitor('find exit') else monitor('go to exit');
+
+SetFillStyle(5,14);
+bar(9,0,29,10);
+
+repeat
+wyl:=false;
+{Ruch g¼sienic¼}
+if keypressed then
+  begin
+     ch:=ReadKey;
+     key:=Port[$60];
+     if key>128 then key:=key-128;
+     case ch of
+     #151:begin
+        if sz<30 then sz:=sz+1;
+        szans;
+        monitor('O no, you know');
+        monitor('pass for a life');
+        end;
+        #152:begin
+        if sz<30 then sz:=sz+1;
+        szans;
+        monitor('O no, you know');
+        monitor('pass for a life');
+        end;
+        #205:begin
+        if not wyjscie then
+        begin
+        wyjscie:=true;
+        pkt:=pkt+500;
+        punkty;
+        PutImage(10+(wx-1)*20,10+(wy-1)*20,ob[10]^,0);
+        monitor('You thief !');
+        end;
+        end;
+        #206:begin
+        kul:=15-klk;
+        kule;
+        Monitor('This pass is only');
+        Monitor('for me...');
+        end;
+        '†':begin
+        lev:=lev+1;
+        level:=true;
+        monitor('Do you want format');
+        monitor('hard drive ?');
+        end;
+        '¼':begin
+        if splev<300 then
+        begin
+        splev:=splev+20;
+        monitor('What ? To fast');
+        end;
+        end;
+        'Š':begin
+        if splev>-100 then
+        begin
+        splev:=splev-20;
+        monitor('What ? To Slow');
+        end;
+        end;
+        'p':begin
+        Monitor('PAUSE. FOR BACK');
+        Monitor('TO GAME PRESS ANY');
+        Monitor('KEY');
+        czekaj;
+        end;
+        end;
+     if ch=#0 then
+     begin
+     ch:=ReadKey;
+
+     case ch of
+        #72:begin
+        if dy<>1 then
+        begin
+        dy:=-1;
+        dx:=0;
+        end;
+        end;
+        #80:begin
+        if dy<>-1 then
+        begin
+        dy:=1;
+        dx:=0;
+        end;
+        end;
+        #75:begin
+        if dx<>1 then
+        begin
+        dx:=-1;
+        dy:=0;
+        end;
+        end;
+        #77:begin
+        if dx<>-1 then
+        begin
+        dx:=1;
+        dy:=0;
+        end;
+        end;
+
+
+  end;
+  end;
+if ((ch<>#72) and (ch<>#0) and (ch<>#80) and (ch<>#77) and (ch<>#75) and (ch<>#27)) then zapomnij;
+end;
+
+SetFillStyle(1,0);
+if pl[x,y]=3 then pl[x,y]:=11;
+if ((pl[x+dx,y+dy]=2) or (pl[x+dx,y+dy]=7) or (x+dx>25) or (y+dy>23) or (x+dx<1) or (y+dy<1)) then wtopa:=true;
+
+if not wtopa then
+  begin
+if ((ga[dg,1]>0) and (ga[dg,2]>0)) then
+PutImage(10+(ga[dg,1]-1)*20,10+(ga[dg,2]-1)*20,ob[pl[ga[dg,1],ga[dg,2]]]^,0);
+x:=x+dx;
+y:=y+dy;
+
+for a:=dg downto 2 do
+   begin
+   ga[a,1]:=ga[a-1,1];
+   ga[a,2]:=ga[a-1,2];
+   if ((ga[a,1]>0) and (ga[a,2]>0)) then PutImage(10+(ga[a,1]-1)*20,10+(ga[a,2]-1)*20,ob[1]^,0);
+   end;
+ga[1,1]:=x;
+ga[1,2]:=y;
+
+if ((ga[1,1]>0) and (ga[1,2]>0)) then if dx=0 then PutImage(10+(x-1)*20,10+(y-1)*20,ob[8]^,0) else
+             PutImage(10+(x-1)*20,10+(y-1)*20,ob[9]^,0);
+
+for a:=1 to dg do
+   for b:=1 to dg do
+   begin
+   if ((ga[a,1]=ga[b,1]) and (ga[a,2]=ga[b,2]) and (b<>a)) then wtopa:=true;
+   end;
+end;
+
+if ((pl[x,y]=6) or (pl[x,y]=14)) then
+begin
+if speaker then sound(600);
+if (raw and (not wyl)) then begin wyl:=true;GrajRaw('.Sound003.Raw',8);end;
+pkt:=pkt+300;
+punkty;
+kulki[4,3]:=0;
+pl[x,y]:=11;
+Monitor('BONUS :');
+if Random(10)>5 then
+    begin
+    splev:=splev-30;
+    Monitor('Fastest game');
+    end else
+If ((Random(5)<=2) and (dg>4)) then
+begin
+for a:=dg downto 4 do
+if ((ga[a,1]>0) and (ga[a,2]>0)) then
+PutImage(10+(ga[a,1]-1)*20,10+(ga[a,2]-1)*20,ob[pl[ga[a,1],ga[a,2]]]^,0);
+dg:=4;
+Monitor('Cut tail');
+end else
+    if ((Random(10)>5) and (kul<=10)) then
+    begin
+    kul:=15-klk;
+    kule;
+    Monitor('All balls');
+    Monitor('find,');
+    if ((wyjscie) and (kul=15)) then Monitor('go to exit') else
+    if kul=15 then Monitor('Find exit');
+    end else
+    if ((Random(10)>5) and not wyjscie) then
+    begin
+    PutImage(10+(wx-1)*20,10+(wy-1)*20,ob[10]^,0);
+    pkt:=pkt+500;
+    wyjscie:=true;
+    punkty;
+    Monitor('Exit is found');
+     Monitor('All is good.');
+    end else
+    if ((Random(5)>=3) and not czysc) then
+    begin
+    for a:=1 to 25 do
+   for b:=1 to 23 do
+       begin
+       if pl[a,b]=3 then pl[a,b]:=11;
+       if pl[a,b]=4 then begin pl[a,b]:=12;end;
+       if pl[a,b]=6 then begin pl[a,b]:=14;end;
+       PutImage(10+(a-1)*20,10+(b-1)*20,ob[pl[a,b]]^,0);
+       end;
+   for a:=1 to 4 do
+       if ((kulki[a,3]=1) or (kulki[a,3]=2)) then kulki[a,3]:=3;
+   czysc:=true;
+   wyjscie:=true;
+   Monitor('Reveal map');
+    end else
+    if Random(10)>5 then
+    begin
+    splev:=splev+50;
+    Monitor('Slowly down');
+    Monitor('game');
+    end else
+    begin
+    sz:=sz+1;
+    Monitor('You have new');
+    Monitor('life !!!');
+    szans;
+    end;
+
+
+if speaker then NoSound;
+end;
+
+
+if ((pl[x,y]=4) or (pl[x,y]=12)) then
+begin
+if speaker then sound(600);
+if (raw and (not wyl)) then begin wyl:=true;GrajRaw('.Sound002.Raw',8);end;
+pkt:=pkt+100;
+punkty;
+kulki[ktora,3]:=0;
+pl[x,y]:=11;
+kul:=kul+1;
+Monitor('You found ball');
+if ((kul<15) and (Random(100)<95)) then Monitor('Yet '+sr(15-kul)+' balls') else
+   begin
+   if kul<14 then
+   begin
+   Monitor('Yet '+sr(15-kul)+' wines...');
+   Monitor('O, Sorry - Balls');
+   end;
+   end;
+
+if kul>=15 then
+   begin
+   if wyjscie then
+   Monitor('Go to exit') else
+   Monitor('Search for exit');
+   if (raw and (not wyl)) then begin wyl:=true;GrajRaw('.Sound001.Raw',8);end;
+   end;
+
+klk:=klk-1;
+dg:=dg+1;
+ga[dg,1]:=ga[dg-1,1];
+ga[dg,2]:=ga[dg-1,2];
+kule;
+
+if ((kul<=14) and (klk<1)) then begin losuj;klk:=3;end;
+if speaker then NoSound;
+end;
+
+if ((pl[x,y]=10) and (kul>=15)) then
+begin
+monitor('NEXT LEVEL...');
+pkt:=pkt+1000;
+punkty;
+lev:=lev+1;
+level:=true;
+if (raw and (not wyl)) then begin wyl:=true;GrajRaw('.Sound000.Raw',8);end;
+end;
+
+if ((pl[x,y]=10) and (not wyjscie)) then
+  begin
+  Monitor('You found exit');
+  pkt:=pkt+500;
+  punkty;
+  dzwiek:=true;
+  wyjscie:=true;
+  if (raw and (not wyl)) then begin wyl:=true;GrajRaw('.Sound005.Raw',8);end;
+  end;
+
+
+if not dzwiek then
+begin
+pr:=(splev+sp-(lev*5));
+if pr<30 then pr:=30;
+if pr>500 then pr:=500;
+delay(pr)
+end
+else
+begin
+dl:=1;
+for a:=1 to 5 do
+begin
+GrajDzwiek(3);
+pr:=(splev+sp-(lev*5)) div 5;
+if pr<5 then pr:=5;
+if pr>100 then pr:=100;
+delay(pr);
+end;
+dzwiek:=false;
+end;
+if wyl then wylacz;
+for b:=1 to 3 do
+   begin
+   if kulki[b,3]=1 then
+      begin
+      kulki[b,3]:=2;
+      PutImage(10+(kulki[b,1]-1)*20,10+(kulki[b,2]-1)*20,ob[5]^,0);
+      end else
+   if kulki[b,3]=2 then
+   begin
+      kulki[b,3]:=1;
+      PutImage(10+(kulki[b,1]-1)*20,10+(kulki[b,2]-1)*20,ob[4]^,0)
+      end;
+   if kulki[b,3]=3 then
+      begin
+      kulki[b,3]:=4;
+      PutImage(10+(kulki[b,1]-1)*20,10+(kulki[b,2]-1)*20,ob[13]^,0);
+      end else
+   if kulki[b,3]=4 then
+   begin
+      kulki[b,3]:=3;
+      PutImage(10+(kulki[b,1]-1)*20,10+(kulki[b,2]-1)*20,ob[12]^,0)
+      end;
+   end;
+
+if kulki[4,3]>0 then
+  begin
+  if kulki[4,3]=1 then
+     begin
+     kulki[4,3]:=2;
+     PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[6]^,0);
+     czaskuli:=czaskuli-1;
+     end else if kulki[4,3]=2 then
+     begin
+     kulki[4,3]:=1;
+     PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[5]^,0);
+     czaskuli:=czaskuli-1;
+     end;
+  if kulki[4,3]=3 then
+     begin
+     kulki[4,3]:=4;
+     PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[14]^,0);
+     czaskuli:=czaskuli-1;
+     end else if kulki[4,3]=4 then
+     begin
+     kulki[4,3]:=3;
+     PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[13]^,0);
+     czaskuli:=czaskuli-1;
+     end;
+  if (czaskuli mod 5=0) then Monitor('Time :'+sr(czaskuli div 5));
+  if czaskuli<1 then begin
+  if kulki[4,3]<3 then
+  begin
+  PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[3]^,0);
+  pl[kulki[4,1],kulki[4,2]]:=3;
+  end
+  else
+     begin
+     PutImage(10+(kulki[4,1]-1)*20,10+(kulki[4,2]-1)*20,ob[11]^,0);
+     pl[kulki[4,1],kulki[4,2]]:=11;
+     end;
+  kulki[4,3]:=0;
+  Monitor('BONUS OVER');
+  end;
+
+  end;
+
+NoSound;
+if Random(400)=10 then monitor('Pascal is good');
+if Random(400)=10 then begin monitor('Processor is');monitor('to hot !!!');end;
+if Random(300)=10 then Monitor('Testing monitor');
+if Random(400)=10 then begin monitor('Hard drive');monitor('infected');end;
+if Random(400)=10 then monitor('Deleting Windows...');
+if Random(500)=10 then monitor('!#@%$#$@%^@%^!*');
+
+if wtopa then monitor('You lost life');
+
+until ((ch=#27) or wtopa or level);
+for a:=1 to 320 do
+   begin
+   linia(0,a*2,640,a*2,0);
+   end;
+if wtopa then
+  begin
+  sz:=sz-1;
+  drzwi(200,100,440,140);
+  SetTextStyle(0,0,1);
+  SetColor(15);
+  st(115,'You lost life');
+  if raw then begin GrajRaw('.Sound006.Raw',1);Delay(100);Wylacz;end;
+  end;
+if level then
+  begin
+
+c:=dg;
+for b:=1 to dg-1 do
+begin
+for a:=dg downto 1 do
+
+   begin
+   PutImage(10+(ga[dg,1]-1)*20,10+(ga[dg,2]-1)*20,ob[pl[ga[dg,1],ga[dg,2]]]^,0);
+   ga[a,1]:=ga[a-1,1];
+   ga[a,2]:=ga[a-1,2];
+   PutImage(10+(ga[a,1]-1)*20,10+(ga[a,2]-1)*20,ob[1]^,0);
+   PutImage(10+(x-1)*20,10+(y-1)*20,ob[10]^,0);
+   end;
+
+for d:=1 to 50
+do begin
+if speaker then Sound(d+100+51*c);
+pr:=(splev+sp-(lev*5)) div 50;
+if pr<0 then pr:=1;
+delay(pr);
+end;
+c:=c-1;
+end;
+
+if speaker then NoSound;
+  drzwi(200,100,440,140);
+  SetTextStyle(0,0,1);
+  SetColor(15);
+  st(115,'YOU PASS '+sr(lev-1)+' LEVEL !!!');
+  if raw then begin GrajRaw('.Sound002.Raw',8);Delay(500);Wylacz;end;
+  end;
+
+if (wtopa or level) then czekaj;
+
+
+until ((ch=#27) or (sz<1) or (lev>13));
+if lev>13 then
+  begin
+  ClearDevice;
+  if soundblaster then Wylacz_muzyke;
+  if soundblaster then Graj_muzyke('.MusicMUSIC5.HSC');
+  narysuj('.Grafikadzdz2');
+  czekaj;
+  ClearDevice;
+  for a:=1 to 32 do
+   for b:=1 to 24 do if Random(10)>5 then
+       PutImage((a-1)*20,(b-1)*20,ob[2]^,0) else
+       PutImage((a-1)*20,(b-1)*20,ob[7]^,0);
+  okno(100,40,540,450);
+  SetTextStyle(0,0,2);
+  SetColor(14);
+  st(50,'HOW DO YOU DO THIS ?!');
+  SetTextStyle(0,0,1);
+  SetColor(15);
+  st(90,'You are so good, that you pass last level.');
+  st(110,'That was amazing. My game is to hard for');
+  st(130,'normal people. Are you from other planet ?');
+  st(150,'(Just kidding). If you want more info then');
+  st(170,'you can tell me what are you want to know');
+  st(190,'brought net (my adress in menu : FROM AUTHOR)');
+  st(210,'but I write this here :');
+  st(230,'BlackAmper@poczta.onet.pl');
+  st(250,'If you make any programs in Turbo Pascal 7.0');
+  st(270,'then you can contact with me (I am from Poland)');
+  st(290,'And we can make games together. I search from');
+  st(310,'good graphic, music, programists (maybe be in');
+  st(330,'Turbo Pascal and Delphi). Anybody which help');
+  st(350,'me is in list of authors. Special thanks for :');
+  st(370,'Christian Wonschak from Riedligen.');
+  st(410,'Press any key');
+  czekaj;
+  if soundblaster then Wylacz_muzyke;
+  pascal;
+  end;
+if sz<1 then
+  begin
+  ClearDevice;
+  narysuj('.Grafikadzdz1');
+  czekaj;
+  end;
+end else
+begin
+                               {Gra na dw¢ch graczy}
+ClearDevice;
+narysuj('.Grafikadzdz9');
+SetTextStyle(2,0,8);
+SetColor(0);
+tekst(330,100,'I am going to win.');
+tekst(120,350,'Ha ha ha ha ha');
+czekaj;
+ClearDevice;
+okno(200,50,440,450);
+SetTextStyle(0,0,1);
+SetColor(15);
+
+for a:=1 to 500 do pliki[a]:='- EMPTY -';
+FindFirst('.level'+sr(trud)+'*.lev',Archive,naz);
+pliki[1]:=naz.Name;
+
+d:=1;
+While DosError=0 do
+begin
+FindNext(naz);
+if doserror=0 then d:=d+1;
+if doserror=0 then pliki[d]:=naz.name;
+
+end;
+c:=0;
+
+
+st(60,'CHOSE LEVEL FOR GAME');
+wokno(244,100,395,261);
+wokno(244,275,395,437);
+ch:=#60;
+zapomnij;
+SetFillStyle(1,15);
+Bar(245,101,394,260);
+gw_init;
+plik:=true;
+repeat
+gwi;
+delay(10);
+
+if plik then
+begin
+Bar(260,101,380,260);
+for a:=1 to 10 do
+   begin
+   if a<>1 then SetColor(8) else SetColor(10);
+   st(100+a*13,pliki[a+c]);
+   SetColor(8);
+   end;
+Assign(F,'.level'+sr(trud)+''+pliki[c+1]);
+Reset(F);
+
+for a:=1 to 25 do
+   for b:=1 to 23 do
+       begin
+       Read(F,pl[a,b]);
+       if pl[a,b]=2 then
+          begin
+          SetFillStyle(1,9);
+          Bar(245+(a-1)*6,276+(b-1)*7,250+(a-1)*6,282+(b-1)*7);
+          przycisk(245+(a-1)*6,276+(b-1)*7,250+(a-1)*6,282+(b-1)*7,3,8);
+          end;
+       if pl[a,b]=7 then
+          begin
+          SetFillStyle(1,2);
+          Bar(245+(a-1)*6,276+(b-1)*7,250+(a-1)*6,282+(b-1)*7);
+          przycisk(245+(a-1)*6,276+(b-1)*7,250+(a-1)*6,282+(b-1)*7,10,8);
+          end;
+       if pl[a,b]=3 then
+          begin
+          SetFillStyle(1,6);
+          Bar(245+(a-1)*6,276+(b-1)*7,250+(a-1)*6,282+(b-1)*7);
+          PutPixel(245+(a-1)*6+Random(6),276+(b-1)*7+Random(7),14);
+          end;
+       if pl[a,b]=11 then
+          begin
+          SetFillStyle(1,8);
+          Bar(245+(a-1)*6,276+(b-1)*7,250+(a-1)*6,282+(b-1)*7);
+          end;
+
+       end;
+Close(F);
+plik:=false;
+x:=0;
+y:=0;
+end;
+
+
+if 
