@@ -1,0 +1,19 @@
+define BST_TREE_INSERT_NODE(Tree, InsertNode)
+    y = NULL
+    x = Tree->Root
+    while (x != NULL)
+        y = x
+        if (InsertNode->Key < x->Key)
+            x = x->left
+        else
+            x = x->right
+
+    InsertNode->Parent = y
+
+    if (y == NULL) //drzewo jest puste
+        Tree->Root = InsertNode
+    else
+        if (InsertNode->Key < y->key)
+            y->Left = InsertNode
+        else
+            y->Right = InsertNode
